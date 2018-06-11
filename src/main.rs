@@ -7,23 +7,31 @@ use rand::Rng;
 fn main() {
     println!("Guess the number game! Input your guess:");
 
-    let mut guess = String::new();
-
-    io::stdin().read_line(&mut guess)
-        .expect("Failed to read line.\n");
-
-    let guess: u32 = guess.trim().parse()
-        .expect("Please type a number.\n");
-
-    let comparison_text;
-
     let secret_number = rand::thread_rng().gen_range(0, 100);
+    let mut attempts: u32 = 0;
 
-    match guess.cmp(&secret_number) {
-        Ordering::Less => comparison_text = "Too small",
-        Ordering::Greater => comparison_text = "Too big",
-        Ordering::Equal => comparison_text = "You win",
+    loop {
+        attempts += 1;
+        let mut guess = String::new();
+
+        io::stdin().read_line(&mut guess)
+            .expect("Failed to read line.");
+
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        let result_text;
+
+        match guess.cmp(&secret_number) {
+            Ordering::Less => result_text = "Too small, guess again:",
+            Ordering::Greater => result_text = "Too big, guess again:",
+            Ordering::Equal => result_text = {
+                format!("You win! Attempts: {}.", attempts);
+                break;
+            }
+
+        println!("\n{}", result_text);
     }
-
-    println!("\n{}, the secret was: {}. You guessed: {}.\n", comparison_text, secret_number, guess);
 }
